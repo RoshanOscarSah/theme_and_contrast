@@ -20,19 +20,31 @@ ThemeData buildHighContrastLightTheme() {
     onSurfaceVariant: AppColors.BLACK,
   );
 
+  TextTheme buildHighContrastLightTextTheme() {
+    return TextTheme(
+      displayLarge: h1Style,
+      displayMedium: h2Style,
+      displaySmall: h3Style,
+      headlineLarge: h4Style,
+      headlineMedium: paragraphStyle,
+      headlineSmall: paragraphMediumStyle,
+      titleLarge: paragraphSemiBoldStyle,
+      titleMedium: paragraphSmallStyle,
+      titleSmall: paragraphSmallBoldStyle,
+      bodyLarge: bodySd1Style,
+      bodyMedium: bodySd2Style,
+      bodySmall: captionMediumStyle,
+      labelSmall: h7Style,
+    );
+  }
+
   return ThemeData(
     useMaterial3: true,
     brightness: Brightness.light,
     colorScheme: colorScheme,
     primaryColor: AppColors.BLACK,
     scaffoldBackgroundColor: AppColors.WHITE,
-    textTheme: TextTheme(
-      headlineSmall: h3Style.copyWith(color: AppColors.BLACK),
-      titleLarge: h2Style.copyWith(color: AppColors.BLACK),
-      bodyLarge: paragraphMediumStyle.copyWith(color: AppColors.BLACK),
-      bodyMedium: paragraphStyle.copyWith(color: AppColors.BLACK),
-      bodySmall: captionMediumStyle.copyWith(color: AppColors.BLACK),
-    ),
+    textTheme: buildHighContrastLightTextTheme(),
     appBarTheme: AppBarTheme(
       backgroundColor: AppColors.BLACK,
       foregroundColor: AppColors.WHITE,

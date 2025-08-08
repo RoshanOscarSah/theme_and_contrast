@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:theme_and_contrast/core/theme/manager/theme_manager.dart';
 
 import 'widgets/appearance_modal.dart';
 import 'widgets/color_swatch.dart';
@@ -13,13 +14,28 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  String _getThemeModeText() {
-    final themeMode =
-        Theme.of(context).brightness == Brightness.dark
-            ? ThemeMode.dark
-            : ThemeMode.light;
+  @override
+  void initState() {
+    super.initState();
+    // Listen to theme changes
+    ThemeManager.addListener(_onThemeChanged);
+  }
 
-    switch (themeMode) {
+  @override
+  void dispose() {
+    // Remove listener when widget is disposed
+    ThemeManager.removeListener(_onThemeChanged);
+    super.dispose();
+  }
+
+  void _onThemeChanged() {
+    setState(() {
+      // Rebuild the widget when theme changes
+    });
+  }
+
+  String _getThemeModeText() {
+    switch (ThemeManager.themeMode) {
       case ThemeMode.light:
         return 'Light';
       case ThemeMode.dark:
@@ -30,11 +46,14 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   String _getContrastModeText() {
-    final isHighContrast = MediaQuery.of(context).highContrast;
-    if (isHighContrast) {
-      return 'High';
+    switch (ThemeManager.contrastMode) {
+      case ContrastMode.normal:
+        return 'Normal';
+      case ContrastMode.high:
+        return 'High';
+      case ContrastMode.system:
+        return 'System';
     }
-    return 'Normal';
   }
 
   void _showAppearanceModal(BuildContext context) {
@@ -47,23 +66,11 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _toggleTheme() {
-    // This would need to be implemented with a state management solution
-    // For now, we'll just show a snackbar
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Theme toggle - implement with state management'),
-      ),
-    );
+    ThemeManager.toggleTheme();
   }
 
   void _toggleContrast() {
-    // This would need to be implemented with a state management solution
-    // For now, we'll just show a snackbar
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Contrast toggle - implement with state management'),
-      ),
-    );
+    ThemeManager.toggleContrast();
   }
 
   @override
@@ -159,7 +166,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   child: Column(
                     children: [
                       Icon(
-                        Theme.of(context).brightness == Brightness.dark
+                        ThemeManager.themeMode == ThemeMode.dark
                             ? Icons.light_mode
                             : Icons.dark_mode,
                         size: 48,
@@ -202,7 +209,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   ElevatedButton.icon(
                     onPressed: _toggleTheme,
                     icon: Icon(
-                      Theme.of(context).brightness == Brightness.dark
+                      ThemeManager.themeMode == ThemeMode.dark
                           ? Icons.light_mode
                           : Icons.dark_mode,
                     ),
@@ -212,7 +219,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   ElevatedButton.icon(
                     onPressed: _toggleContrast,
                     icon: Icon(
-                      _getContrastModeText() == 'High'
+                      ThemeManager.contrastMode == ContrastMode.high
                           ? Icons.contrast
                           : Icons.contrast_outlined,
                     ),

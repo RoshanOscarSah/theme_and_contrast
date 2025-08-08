@@ -1,14 +1,29 @@
 import 'package:flutter/material.dart';
-import '../dark_theme.dart';
+import '../theme_dark.dart';
 import '../high_contrast_dark_theme.dart';
 import '../high_contrast_light_theme.dart';
-import '../light_theme.dart';
+import '../theme_light.dart';
 
 enum ContrastMode { normal, high, system }
 
 class ThemeManager {
-  static const ThemeMode _themeMode = ThemeMode.system;
-  static const ContrastMode _contrastMode = ContrastMode.system;
+  static ThemeMode _themeMode = ThemeMode.system;
+  static ContrastMode _contrastMode = ContrastMode.system;
+  static final List<Function()> _listeners = [];
+
+  static void addListener(Function() listener) {
+    _listeners.add(listener);
+  }
+
+  static void removeListener(Function() listener) {
+    _listeners.remove(listener);
+  }
+
+  static void _notifyListeners() {
+    for (final listener in _listeners) {
+      listener();
+    }
+  }
 
   static ThemeData getLightTheme() {
     if (_contrastMode == ContrastMode.high) {
@@ -36,6 +51,44 @@ class ThemeManager {
       return buildHighContrastDarkTheme();
     }
     return null;
+  }
+
+  static void setContrastMode(ContrastMode contrastMode) {
+    _contrastMode = contrastMode;
+    _notifyListeners();
+  }
+
+  static void setThemeMode(ThemeMode themeMode) {
+    _themeMode = themeMode;
+    _notifyListeners();
+  }
+
+  static void toggleTheme() {
+    switch (_themeMode) {
+      case ThemeMode.light:
+        setThemeMode(ThemeMode.dark);
+        break;
+      case ThemeMode.dark:
+        setThemeMode(ThemeMode.system);
+        break;
+      case ThemeMode.system:
+        setThemeMode(ThemeMode.light);
+        break;
+    }
+  }
+
+  static void toggleContrast() {
+    switch (_contrastMode) {
+      case ContrastMode.normal:
+        setContrastMode(ContrastMode.high);
+        break;
+      case ContrastMode.high:
+        setContrastMode(ContrastMode.system);
+        break;
+      case ContrastMode.system:
+        setContrastMode(ContrastMode.normal);
+        break;
+    }
   }
 
   static ThemeMode get themeMode => _themeMode;

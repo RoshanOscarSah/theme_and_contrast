@@ -20,6 +20,21 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
+    // Listen to theme changes
+    ThemeManager.addListener(_onThemeChanged);
+  }
+
+  @override
+  void dispose() {
+    // Remove listener when widget is disposed
+    ThemeManager.removeListener(_onThemeChanged);
+    super.dispose();
+  }
+
+  void _onThemeChanged() {
+    setState(() {
+      // Rebuild the widget when theme changes
+    });
   }
 
   @override
