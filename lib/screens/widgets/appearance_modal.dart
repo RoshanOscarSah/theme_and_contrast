@@ -1,23 +1,21 @@
 import 'package:flutter/material.dart';
-import '../models/contrast_mode.dart';
+import 'package:theme_and_contrast/core/theme/manager/theme_manager.dart';
 
 class AppearanceModal extends StatelessWidget {
-  final ThemeMode themeMode;
-  final ContrastMode contrastMode;
-  final VoidCallback onThemeToggle;
-  final VoidCallback onContrastToggle;
-
-  const AppearanceModal({
-    super.key,
-    required this.themeMode,
-    required this.contrastMode,
-    required this.onThemeToggle,
-    required this.onContrastToggle,
-  });
+  const AppearanceModal({super.key});
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final themeMode =
+        Theme.of(context).brightness == Brightness.dark
+            ? ThemeMode.dark
+            : ThemeMode.light;
+    final contrastMode =
+        MediaQuery.of(context).highContrast
+            ? ContrastMode.high
+            : ContrastMode.normal;
+
     return Container(
       height: MediaQuery.of(context).size.height * 0.7,
       decoration: BoxDecoration(
@@ -31,7 +29,7 @@ class AppearanceModal extends StatelessWidget {
             width: 40,
             height: 4,
             decoration: BoxDecoration(
-              color: colorScheme.onSurface.withOpacity(0.3),
+              color: colorScheme.onSurface.withValues(alpha: 0.3),
               borderRadius: BorderRadius.circular(2),
             ),
           ),
@@ -61,11 +59,11 @@ class AppearanceModal extends StatelessWidget {
                 children: [
                   _buildSectionTitle(context, 'Theme'),
                   const SizedBox(height: 16),
-                  _buildThemeOptions(context),
+                  _buildThemeOptions(context, themeMode),
                   const SizedBox(height: 32),
                   _buildSectionTitle(context, 'Contrast'),
                   const SizedBox(height: 16),
-                  _buildContrastOptions(context),
+                  _buildContrastOptions(context, contrastMode),
                   const SizedBox(height: 32),
                 ],
               ),
@@ -85,24 +83,40 @@ class AppearanceModal extends StatelessWidget {
     );
   }
 
-  Widget _buildThemeOptions(BuildContext context) {
+  Widget _buildThemeOptions(BuildContext context, ThemeMode themeMode) {
     return Row(
       children: [
-        Expanded(child: _buildThemeCard(context, ThemeMode.light, 'Light')),
+        Expanded(
+          child: _buildThemeCard(context, ThemeMode.light, 'Light', themeMode),
+        ),
         const SizedBox(width: 12),
-        Expanded(child: _buildThemeCard(context, ThemeMode.dark, 'Dark')),
+        Expanded(
+          child: _buildThemeCard(context, ThemeMode.dark, 'Dark', themeMode),
+        ),
         const SizedBox(width: 12),
-        Expanded(child: _buildThemeCard(context, ThemeMode.system, 'System')),
+        Expanded(
+          child: _buildThemeCard(
+            context,
+            ThemeMode.system,
+            'System',
+            themeMode,
+          ),
+        ),
       ],
     );
   }
 
-  Widget _buildThemeCard(BuildContext context, ThemeMode target, String title) {
-    final isSelected = themeMode == target;
+  Widget _buildThemeCard(
+    BuildContext context,
+    ThemeMode target,
+    String title,
+    ThemeMode currentThemeMode,
+  ) {
+    final isSelected = currentThemeMode == target;
     final colorScheme = Theme.of(context).colorScheme;
     return GestureDetector(
       onTap: () {
-        onThemeToggle();
+        // onThemeToggle(); // This line was removed as per the new_code
         Navigator.pop(context);
       },
       child: Container(
@@ -252,17 +266,37 @@ class AppearanceModal extends StatelessWidget {
     );
   }
 
-  Widget _buildContrastOptions(BuildContext context) {
+  Widget _buildContrastOptions(
+    BuildContext context,
+    ContrastMode contrastMode,
+  ) {
     return Row(
       children: [
         Expanded(
-          child: _buildContrastCard(context, ContrastMode.normal, 'Normal'),
+          child: _buildContrastCard(
+            context,
+            ContrastMode.normal,
+            'Normal',
+            contrastMode,
+          ),
         ),
         const SizedBox(width: 12),
-        Expanded(child: _buildContrastCard(context, ContrastMode.high, 'High')),
+        Expanded(
+          child: _buildContrastCard(
+            context,
+            ContrastMode.high,
+            'High',
+            contrastMode,
+          ),
+        ),
         const SizedBox(width: 12),
         Expanded(
-          child: _buildContrastCard(context, ContrastMode.system, 'System'),
+          child: _buildContrastCard(
+            context,
+            ContrastMode.system,
+            'System',
+            contrastMode,
+          ),
         ),
       ],
     );
@@ -272,12 +306,13 @@ class AppearanceModal extends StatelessWidget {
     BuildContext context,
     ContrastMode target,
     String title,
+    ContrastMode currentContrastMode,
   ) {
-    final isSelected = contrastMode == target;
+    final isSelected = currentContrastMode == target;
     final colorScheme = Theme.of(context).colorScheme;
     return GestureDetector(
       onTap: () {
-        onContrastToggle();
+        // onContrastToggle(); // This line was removed as per the new_code
         Navigator.pop(context);
       },
       child: Container(
