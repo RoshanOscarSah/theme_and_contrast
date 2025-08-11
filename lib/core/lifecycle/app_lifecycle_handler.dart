@@ -8,16 +8,20 @@ class AppLifecycleHandler with WidgetsBindingObserver {
   Timer? _debounceTimer;
   bool _isProcessing = false;
 
-  AppLifecycleHandler({
-    this.onAppResumed,
-    this.onAppPaused,
-  }) {
+  AppLifecycleHandler({this.onAppResumed, this.onAppPaused}) {
     WidgetsBinding.instance.addObserver(this);
     _checkInitialContrastStatus();
   }
 
   void dispose() {
+    // Cancel timer and set to null to prevent any further usage
     _debounceTimer?.cancel();
+    _debounceTimer = null;
+
+    // Reset processing flag
+    _isProcessing = false;
+
+    // Remove observer
     WidgetsBinding.instance.removeObserver(this);
   }
 
@@ -32,6 +36,11 @@ class AppLifecycleHandler with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    // Check if the handler is still valid (not disposed)
+    if (_debounceTimer == null) {
+      return; // Handler has been disposed, ignore lifecycle events
+    }
+
     switch (state) {
       case AppLifecycleState.resumed:
         _handleAppResumed();
@@ -55,11 +64,21 @@ class AppLifecycleHandler with WidgetsBindingObserver {
     // Debounce rapid resume events
     _debounceTimer?.cancel();
     _debounceTimer = Timer(const Duration(milliseconds: 300), () {
-      if (!_isProcessing) {
+      // Check if the handler is still valid before processing
+      if (!_isProcessing && onAppResumed != null) {
         _isProcessing = true;
-        _checkContrastChanges();
-        onAppResumed?.call();
-        _isProcessing = false;
+        _checkContrastChanges()
+            .then((_) {
+              // Only call onAppResumed if the timer hasn't been cancelled
+              if (_debounceTimer != null) {
+                onAppResumed?.call();
+              }
+              _isProcessing = false;
+            })
+            .catchError((error) {
+              debugPrint('Error in contrast check: $error');
+              _isProcessing = false;
+            });
       }
     });
   }
@@ -72,10 +91,9 @@ class AppLifecycleHandler with WidgetsBindingObserver {
     try {
       final isHighContrast = await ContrastService.isHighContrastEnabled();
       debugPrint('High contrast status on resume: $isHighContrast');
-      
+
       // Here you could add logic to refresh theme/contrast settings
       // For example, trigger a rebuild of the app with new contrast settings
-      
     } catch (e) {
       debugPrint('Error checking contrast changes: $e');
     }

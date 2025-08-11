@@ -12,7 +12,7 @@ ThemeData buildHighContrastLightTheme() {
     backgroundPrimary: AppColors.BACKGROUND_PRIMARY,
     red500: AppColors.BLUE_700,
   );
-  TextTheme buildHighContrastDarkTextTheme() {
+  TextTheme buildHighContrastLightTextTheme() {
     return TextTheme(
       displayLarge: h1Style,
       displayMedium: h2Style,
@@ -34,7 +34,7 @@ ThemeData buildHighContrastLightTheme() {
 
   return ThemeData(
     brightness: Brightness.light,
-    textTheme: buildHighContrastDarkTextTheme(),
+    textTheme: buildHighContrastLightTextTheme(),
     extensions: [extensionColors],
   );
 }

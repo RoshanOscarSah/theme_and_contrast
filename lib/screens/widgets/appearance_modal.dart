@@ -1,20 +1,39 @@
 import 'package:flutter/material.dart';
 import 'package:theme_and_contrast/core/theme/manager/theme_manager.dart';
 
-class AppearanceModal extends StatelessWidget {
+class AppearanceModal extends StatefulWidget {
   const AppearanceModal({super.key});
+
+  @override
+  State<AppearanceModal> createState() => _AppearanceModalState();
+}
+
+class _AppearanceModalState extends State<AppearanceModal> {
+  @override
+  void initState() {
+    super.initState();
+    // Listen to theme changes
+    ThemeManager.addListener(_onThemeChanged);
+  }
+
+  @override
+  void dispose() {
+    // Remove listener when widget is disposed
+    ThemeManager.removeListener(_onThemeChanged);
+    super.dispose();
+  }
+
+  void _onThemeChanged() {
+    setState(() {
+      // Rebuild the widget when theme changes
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final themeMode =
-        Theme.of(context).brightness == Brightness.dark
-            ? ThemeMode.dark
-            : ThemeMode.light;
-    final contrastMode =
-        MediaQuery.of(context).highContrast
-            ? ContrastMode.high
-            : ContrastMode.normal;
+    final themeMode = ThemeManager.themeMode;
+    final contrastMode = ThemeManager.contrastMode;
 
     return Container(
       height: MediaQuery.of(context).size.height * 0.7,
@@ -116,7 +135,7 @@ class AppearanceModal extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     return GestureDetector(
       onTap: () {
-        // onThemeToggle(); // This line was removed as per the new_code
+        ThemeManager.setThemeMode(target);
         Navigator.pop(context);
       },
       child: Container(
@@ -312,7 +331,7 @@ class AppearanceModal extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     return GestureDetector(
       onTap: () {
-        // onContrastToggle(); // This line was removed as per the new_code
+        ThemeManager.setContrastMode(target);
         Navigator.pop(context);
       },
       child: Container(

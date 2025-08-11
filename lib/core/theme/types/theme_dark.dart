@@ -11,7 +11,7 @@ ThemeData buildDarkTheme() {
     backgroundPrimary: AppColors.BACKGROUND_APP,
     red500: AppColors.RED_800,
   );
-  TextTheme buildHighContrastDarkTextTheme() {
+  TextTheme buildDarkTextTheme() {
     return TextTheme(
       displayLarge: h1Style,
       displayMedium: h2Style,
@@ -33,7 +33,7 @@ ThemeData buildDarkTheme() {
 
   return ThemeData(
     brightness: Brightness.dark,
-    textTheme: buildHighContrastDarkTextTheme(),
+    textTheme: buildDarkTextTheme(),
     extensions: [extensionColors],
   );
 }
