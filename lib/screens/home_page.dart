@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:theme_and_contrast/core/theme/design_system/app_color_extension.dart';
 import 'package:theme_and_contrast/core/theme/manager/theme_manager.dart';
+import 'package:theme_and_contrast/core/theme/manager/theme_inherited_widget.dart';
 
 import 'widgets/appearance_modal.dart';
 import 'widgets/color_swatch.dart';
@@ -15,28 +16,11 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  @override
-  void initState() {
-    super.initState();
-    // Listen to theme changes
-    ThemeManager.addListener(_onThemeChanged);
-  }
+  String _getThemeModeText(BuildContext context) {
+    final themeInherited = ThemeInheritedWidget.of(context);
+    if (themeInherited == null) return 'Unknown';
 
-  @override
-  void dispose() {
-    // Remove listener when widget is disposed
-    ThemeManager.removeListener(_onThemeChanged);
-    super.dispose();
-  }
-
-  void _onThemeChanged() {
-    setState(() {
-      // Rebuild the widget when theme changes
-    });
-  }
-
-  String _getThemeModeText() {
-    switch (ThemeManager.themeMode) {
+    switch (themeInherited.themeMode) {
       case ThemeMode.light:
         return 'Light';
       case ThemeMode.dark:
@@ -46,8 +30,11 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  String _getContrastModeText() {
-    switch (ThemeManager.contrastMode) {
+  String _getContrastModeText(BuildContext context) {
+    final themeInherited = ThemeInheritedWidget.of(context);
+    if (themeInherited == null) return 'Unknown';
+
+    switch (themeInherited.contrastMode) {
       case ContrastMode.normal:
         return 'Normal';
       case ContrastMode.high:
@@ -64,14 +51,6 @@ class _MyHomePageState extends State<MyHomePage> {
       backgroundColor: Colors.transparent,
       builder: (context) => const AppearanceModal(),
     );
-  }
-
-  void _toggleTheme() {
-    ThemeManager.toggleTheme();
-  }
-
-  void _toggleContrast() {
-    ThemeManager.toggleContrast();
   }
 
   @override
@@ -179,12 +158,12 @@ class _MyHomePageState extends State<MyHomePage> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Current Theme: ${_getThemeModeText()}',
+                        'Current Theme: ${_getThemeModeText(context)}',
                         style: Theme.of(context).textTheme.headlineSmall,
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Contrast Mode: ${_getContrastModeText()}',
+                        'Contrast Mode: ${_getContrastModeText(context)}',
                         style: Theme.of(context).textTheme.bodyLarge,
                       ),
                       const SizedBox(height: 8),
@@ -212,21 +191,35 @@ class _MyHomePageState extends State<MyHomePage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   ElevatedButton.icon(
-                    onPressed: _toggleTheme,
-                    icon: Icon(
-                      ThemeManager.themeMode == ThemeMode.dark
-                          ? Icons.light_mode
-                          : Icons.dark_mode,
+                    onPressed: () {
+                      ThemeManager.toggleTheme();
+                    },
+                    icon: Builder(
+                      builder: (context) {
+                        final themeInherited = ThemeInheritedWidget.of(context);
+                        return Icon(
+                          themeInherited?.themeMode == ThemeMode.dark
+                              ? Icons.light_mode
+                              : Icons.dark_mode,
+                        );
+                      },
                     ),
                     label: const Text('Switch Theme'),
                   ),
                   const SizedBox(width: 16),
                   ElevatedButton.icon(
-                    onPressed: _toggleContrast,
-                    icon: Icon(
-                      ThemeManager.contrastMode == ContrastMode.high
-                          ? Icons.contrast
-                          : Icons.contrast_outlined,
+                    onPressed: () {
+                      ThemeManager.toggleContrast();
+                    },
+                    icon: Builder(
+                      builder: (context) {
+                        final themeInherited = ThemeInheritedWidget.of(context);
+                        return Icon(
+                          themeInherited?.contrastMode == ContrastMode.high
+                              ? Icons.contrast
+                              : Icons.contrast_outlined,
+                        );
+                      },
                     ),
                     label: const Text('Toggle Contrast'),
                   ),
