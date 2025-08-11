@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:theme_and_contrast/core/theme/design_system/app_color_extension.dart';
 import 'package:theme_and_contrast/core/theme/manager/theme_manager.dart';
 
 import 'widgets/appearance_modal.dart';
@@ -140,6 +141,10 @@ class _MyHomePageState extends State<MyHomePage> {
                         'Current Theme Info:',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.w600,
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onSecondaryContainer
+                              .withValues(alpha: 0.1),
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -243,11 +248,26 @@ class _MyHomePageState extends State<MyHomePage> {
                         spacing: 8,
                         runSpacing: 8,
                         children: [
-                          DemoColorSwatch('Primary', colorScheme.primary),
-                          DemoColorSwatch('Secondary', colorScheme.secondary),
-                          DemoColorSwatch('Surface', colorScheme.surface),
-                          DemoColorSwatch('Background', colorScheme.surface),
-                          DemoColorSwatch('Error', colorScheme.error),
+                          DemoColorSwatch(
+                            'Yellow',
+                            Theme.of(context).extensionColors.yellow500,
+                          ),
+                          DemoColorSwatch(
+                            'Brown',
+                            Theme.of(context).extensionColors.brown500,
+                          ),
+                          DemoColorSwatch(
+                            'Emerald',
+                            Theme.of(context).extensionColors.emerald500,
+                          ),
+                          DemoColorSwatch(
+                            'Background',
+                            Theme.of(context).extensionColors.backgroundPrimary,
+                          ),
+                          DemoColorSwatch(
+                            'Error',
+                            Theme.of(context).extensionColors.red500,
+                          ),
                         ],
                       ),
                     ],

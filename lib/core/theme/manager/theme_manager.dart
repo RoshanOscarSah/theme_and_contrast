@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../theme_dark.dart';
-import '../high_contrast_dark_theme.dart';
-import '../high_contrast_light_theme.dart';
-import '../theme_light.dart';
+import '../types/theme_dark.dart';
+import '../types/high_contrast_dark_theme.dart';
+import '../types/high_contrast_light_theme.dart';
+import '../types/theme_light.dart';
 
 enum ContrastMode { normal, high, system }
 
