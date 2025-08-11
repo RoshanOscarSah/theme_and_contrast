@@ -3,6 +3,7 @@ import '../types/theme_dark.dart';
 import '../types/high_contrast_dark_theme.dart';
 import '../types/high_contrast_light_theme.dart';
 import '../types/theme_light.dart';
+import '../../persistant_storage/theme_preferences.dart';
 
 enum ContrastMode { normal, high, system }
 
@@ -10,6 +11,21 @@ class ThemeManager {
   static ThemeMode _themeMode = ThemeMode.system;
   static ContrastMode _contrastMode = ContrastMode.system;
   static final List<Function()> _listeners = [];
+  static bool _initialized = false;
+  static bool _isLoading = false; // Flag to prevent saving during loading
+
+  // Initialize the theme manager and load saved preferences
+  static void initialize() {
+    if (_initialized) {
+      return;
+    }
+
+    _isLoading = true;
+    // Load saved preferences
+    ThemePreferences.loadPreferences();
+    _isLoading = false;
+    _initialized = true;
+  }
 
   static void addListener(Function() listener) {
     _listeners.add(listener);
@@ -55,11 +71,19 @@ class ThemeManager {
 
   static void setContrastMode(ContrastMode contrastMode) {
     _contrastMode = contrastMode;
+    // Save to persistent storage only if not loading
+    if (!_isLoading) {
+      ThemePreferences.setContrastMode(contrastMode);
+    } else {}
     _notifyListeners();
   }
 
   static void setThemeMode(ThemeMode themeMode) {
     _themeMode = themeMode;
+    // Save to persistent storage only if not loading
+    if (!_isLoading) {
+      ThemePreferences.setThemeMode(themeMode);
+    } else {}
     _notifyListeners();
   }
 

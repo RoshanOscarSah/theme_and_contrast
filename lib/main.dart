@@ -4,9 +4,17 @@ import 'screens/home_page.dart';
 import 'core/theme/manager/theme_manager.dart';
 import 'core/theme/manager/theme_inherited_widget.dart';
 import 'core/lifecycle/app_wrapper.dart';
+import 'core/persistant_storage/get_storage.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize storage first
+  await GetSetStorage.init();
+
+  // Initialize theme manager and load saved preferences
+  ThemeManager.initialize();
+
   runApp(const MyApp());
 }
 
