@@ -4,6 +4,7 @@ import '../types/high_contrast_dark_theme.dart';
 import '../types/high_contrast_light_theme.dart';
 import '../types/theme_light.dart';
 import '../../persistant_storage/theme_preferences.dart';
+import '../manager/contrast_manager.dart';
 
 enum ContrastMode { normal, high, system }
 
@@ -13,6 +14,8 @@ class ThemeManager {
   static final List<Function()> _listeners = [];
   static bool _initialized = false;
   static bool _isLoading = false; // Flag to prevent saving during loading
+  static bool _systemHighContrastEnabled =
+      false; // Track system high contrast state
 
   // Initialize the theme manager and load saved preferences
   static void initialize() {
@@ -25,6 +28,9 @@ class ThemeManager {
     ThemePreferences.loadPreferences();
     _isLoading = false;
     _initialized = true;
+
+    // Check initial system high contrast status
+    _checkSystemHighContrast();
   }
 
   static void addListener(Function() listener) {
@@ -41,21 +47,71 @@ class ThemeManager {
     }
   }
 
-  static ThemeData getLightTheme() {
+  // Check if system high contrast is enabled
+  static Future<bool> isSystemHighContrastEnabled() async {
+    try {
+      return await ContrastService.isHighContrastEnabled();
+    } catch (e) {
+      return false;
+    }
+  }
+
+  // Check and update system high contrast status
+  static Future<void> _checkSystemHighContrast() async {
+    final wasEnabled = _systemHighContrastEnabled;
+    _systemHighContrastEnabled = await isSystemHighContrastEnabled();
+
+    // If system high contrast status changed, notify listeners
+    if (wasEnabled != _systemHighContrastEnabled) {
+      _notifyListeners();
+    }
+  }
+
+  // Refresh theme based on current system settings
+  static Future<void> refreshSystemSettings() async {
+
+    // Check if system high contrast is enabled
+    final isSystemHighContrast = await isSystemHighContrastEnabled();
+
+    // Update the system high contrast status
+    _systemHighContrastEnabled = isSystemHighContrast;
+
+    // If contrast mode is set to system, we need to notify listeners
+    // so the app can rebuild with the correct theme
+    if (_contrastMode == ContrastMode.system) {
+      _notifyListeners();
+    }
+  }
+
+  // Helper method to determine if high contrast should be applied
+  static bool _shouldUseHighContrast() {
     if (_contrastMode == ContrastMode.high) {
+      return true;
+    }
+    if (_contrastMode == ContrastMode.system) {
+      return _systemHighContrastEnabled;
+    }
+    return false;
+  }
+
+  static ThemeData getLightTheme() {
+    // Check if we should use high contrast based on current settings
+    if (_shouldUseHighContrast()) {
       return buildHighContrastLightTheme();
     }
     return buildLightTheme();
   }
 
   static ThemeData getDarkTheme() {
-    if (_contrastMode == ContrastMode.high) {
+    // Check if we should use high contrast based on current settings
+    if (_shouldUseHighContrast()) {
       return buildHighContrastDarkTheme();
     }
     return buildDarkTheme();
   }
 
   static ThemeData? getHighContrastLightTheme() {
+    // Only provide high contrast theme if system mode is set
     if (_contrastMode == ContrastMode.system) {
       return buildHighContrastLightTheme();
     }
@@ -63,6 +119,7 @@ class ThemeManager {
   }
 
   static ThemeData? getHighContrastDarkTheme() {
+    // Only provide high contrast theme if system mode is set
     if (_contrastMode == ContrastMode.system) {
       return buildHighContrastDarkTheme();
     }
@@ -74,7 +131,8 @@ class ThemeManager {
     // Save to persistent storage only if not loading
     if (!_isLoading) {
       ThemePreferences.setContrastMode(contrastMode);
-    } else {}
+    } else {
+    }
     _notifyListeners();
   }
 
@@ -83,7 +141,8 @@ class ThemeManager {
     // Save to persistent storage only if not loading
     if (!_isLoading) {
       ThemePreferences.setThemeMode(themeMode);
-    } else {}
+    } else {
+    }
     _notifyListeners();
   }
 
@@ -117,4 +176,7 @@ class ThemeManager {
 
   static ThemeMode get themeMode => _themeMode;
   static ContrastMode get contrastMode => _contrastMode;
+
+  // Getter for current system high contrast status
+  static bool get systemHighContrastEnabled => _systemHighContrastEnabled;
 }

@@ -44,6 +44,25 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
+  String _getCurrentHighContrastStatus() {
+    final themeInherited = ThemeInheritedWidget.of(context);
+    if (themeInherited == null) return 'Unknown';
+
+    switch (themeInherited.contrastMode) {
+      case ContrastMode.high:
+        return 'Enabled (App)';
+      case ContrastMode.system:
+        // Check if system high contrast is enabled
+        if (ThemeManager.systemHighContrastEnabled) {
+          return 'Enabled (System)';
+        } else {
+          return 'Disabled (System)';
+        }
+      case ContrastMode.normal:
+        return 'Disabled (App)';
+    }
+  }
+
   void _showAppearanceModal(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -82,72 +101,6 @@ class _MyHomePageState extends State<MyHomePage> {
                 child: Padding(
                   padding: const EdgeInsets.all(16),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Dynamic Theme Demo',
-                        style: Theme.of(context).textTheme.displayMedium,
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'This ListTile adapts to your current theme:',
-                        style: Theme.of(context).textTheme.bodyMedium,
-                      ),
-                      const SizedBox(height: 8),
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.surface,
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                            color: Theme.of(context).colorScheme.outline,
-                          ),
-                        ),
-                        child: ListTile(
-                          contentPadding: EdgeInsets.zero,
-                          title: Text(
-                            "Dynamic Switch",
-                            style: Theme.of(context).textTheme.bodyMedium,
-                          ),
-                          trailing: Switch.adaptive(
-                            value: true,
-                            onChanged: (value) {},
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Current Theme Info:',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: Theme.of(context)
-                              .colorScheme
-                              .onSecondaryContainer
-                              .withValues(alpha: 0.1),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        '• Primary: ${Theme.of(context).colorScheme.primary}',
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
-                      Text(
-                        '• Surface: ${Theme.of(context).colorScheme.surface}',
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
-                      Text(
-                        '• On Surface: ${Theme.of(context).colorScheme.onSurface}',
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              Card(
-                margin: const EdgeInsets.all(16),
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
                     children: [
                       Icon(
                         ThemeManager.themeMode == ThemeMode.dark
@@ -174,12 +127,12 @@ class _MyHomePageState extends State<MyHomePage> {
                       const SizedBox(height: 8),
                       if (Platform.isAndroid)
                         Text(
-                          'High Contrast: ${isHighContrast ? "Enabled" : "Disabled"}',
+                          'High Contrast: ${_getCurrentHighContrastStatus()}',
                           style: Theme.of(context).textTheme.bodyMedium,
                         ),
                       if (Platform.isIOS)
                         Text(
-                          'High Contrast: ${isHighContrast ? "Enabled" : "Disabled"}',
+                          'High Contrast ios: ${isHighContrast ? "Enabled" : "Disabled"}',
                           style: Theme.of(context).textTheme.bodyMedium,
                         ),
                     ],

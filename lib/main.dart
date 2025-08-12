@@ -49,6 +49,10 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return AppWrapper(
+      onAppResumed: () {
+        // Force rebuild when app resumes to reflect any system changes
+        setState(() {});
+      },
       child: ThemeInheritedWidget(
         themeMode: ThemeManager.themeMode,
         contrastMode: ThemeManager.contrastMode,
