@@ -41,9 +41,11 @@ class _MyAppState extends State<MyApp> {
   }
 
   void _onThemeChanged() {
-    setState(() {
-      // Rebuild the widget when theme changes
-    });
+    if (mounted) {
+      setState(() {
+        // Rebuild the widget when theme changes
+      });
+    }
   }
 
   @override
@@ -51,7 +53,9 @@ class _MyAppState extends State<MyApp> {
     return AppWrapper(
       onAppResumed: () {
         // Force rebuild when app resumes to reflect any system changes
-        setState(() {});
+        if (mounted) {
+          setState(() {});
+        }
       },
       child: ThemeInheritedWidget(
         themeMode: ThemeManager.themeMode,

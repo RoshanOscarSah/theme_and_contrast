@@ -5,6 +5,7 @@ import '../types/high_contrast_light_theme.dart';
 import '../types/theme_light.dart';
 import '../../persistant_storage/theme_preferences.dart';
 import '../manager/contrast_manager.dart';
+import '../../utils/performance_monitor.dart';
 
 enum ContrastMode { normal, high, system }
 
@@ -17,12 +18,18 @@ class ThemeManager {
   static bool _systemHighContrastEnabled =
       false; // Track system high contrast state
 
+  // Cache theme data for better performance
+  static ThemeData? _cachedLightTheme;
+  static ThemeData? _cachedDarkTheme;
+  static ThemeData? _cachedHighContrastLightTheme;
+  static ThemeData? _cachedHighContrastDarkTheme;
+  static bool _cacheValid = false;
+
   // Initialize the theme manager and load saved preferences
   static void initialize() {
-    if (_initialized) {
-      return;
-    }
+    if (_initialized) return;
 
+    PerformanceMonitor.startTimer('theme_initialization');
     _isLoading = true;
     // Load saved preferences
     ThemePreferences.loadPreferences();
@@ -31,10 +38,13 @@ class ThemeManager {
 
     // Check initial system high contrast status
     _checkSystemHighContrast();
+    PerformanceMonitor.endTimer('theme_initialization');
   }
 
   static void addListener(Function() listener) {
-    _listeners.add(listener);
+    if (!_listeners.contains(listener)) {
+      _listeners.add(listener);
+    }
   }
 
   static void removeListener(Function() listener) {
@@ -42,8 +52,15 @@ class ThemeManager {
   }
 
   static void _notifyListeners() {
+    // Invalidate cache when notifying listeners
+    _cacheValid = false;
+
     for (final listener in _listeners) {
-      listener();
+      try {
+        listener();
+      } catch (e) {
+        // Silently handle listener errors
+      }
     }
   }
 
@@ -69,7 +86,7 @@ class ThemeManager {
 
   // Refresh theme based on current system settings
   static Future<void> refreshSystemSettings() async {
-
+    PerformanceMonitor.startTimer('refresh_system_settings');
     // Check if system high contrast is enabled
     final isSystemHighContrast = await isSystemHighContrastEnabled();
 
@@ -81,6 +98,7 @@ class ThemeManager {
     if (_contrastMode == ContrastMode.system) {
       _notifyListeners();
     }
+    PerformanceMonitor.endTimer('refresh_system_settings');
   }
 
   // Helper method to determine if high contrast should be applied
@@ -94,26 +112,42 @@ class ThemeManager {
     return false;
   }
 
+  // Build and cache themes for better performance
+  static void _buildCachedThemes() {
+    if (_cacheValid) return;
+
+    PerformanceMonitor.startTimer('build_cached_themes');
+    _cachedLightTheme = buildLightTheme();
+    _cachedDarkTheme = buildDarkTheme();
+    _cachedHighContrastLightTheme = buildHighContrastLightTheme();
+    _cachedHighContrastDarkTheme = buildHighContrastDarkTheme();
+    _cacheValid = true;
+    PerformanceMonitor.endTimer('build_cached_themes');
+  }
+
   static ThemeData getLightTheme() {
+    _buildCachedThemes();
     // Check if we should use high contrast based on current settings
     if (_shouldUseHighContrast()) {
-      return buildHighContrastLightTheme();
+      return _cachedHighContrastLightTheme!;
     }
-    return buildLightTheme();
+    return _cachedLightTheme!;
   }
 
   static ThemeData getDarkTheme() {
+    _buildCachedThemes();
     // Check if we should use high contrast based on current settings
     if (_shouldUseHighContrast()) {
-      return buildHighContrastDarkTheme();
+      return _cachedHighContrastDarkTheme!;
     }
-    return buildDarkTheme();
+    return _cachedDarkTheme!;
   }
 
   static ThemeData? getHighContrastLightTheme() {
     // Only provide high contrast theme if system mode is set
     if (_contrastMode == ContrastMode.system) {
-      return buildHighContrastLightTheme();
+      _buildCachedThemes();
+      return _cachedHighContrastLightTheme;
     }
     return null;
   }
@@ -121,7 +155,8 @@ class ThemeManager {
   static ThemeData? getHighContrastDarkTheme() {
     // Only provide high contrast theme if system mode is set
     if (_contrastMode == ContrastMode.system) {
-      return buildHighContrastDarkTheme();
+      _buildCachedThemes();
+      return _cachedHighContrastDarkTheme;
     }
     return null;
   }
@@ -131,7 +166,6 @@ class ThemeManager {
     // Save to persistent storage only if not loading
     if (!_isLoading) {
       ThemePreferences.setContrastMode(contrastMode);
-    } else {
     }
     _notifyListeners();
   }
@@ -141,7 +175,6 @@ class ThemeManager {
     // Save to persistent storage only if not loading
     if (!_isLoading) {
       ThemePreferences.setThemeMode(themeMode);
-    } else {
     }
     _notifyListeners();
   }

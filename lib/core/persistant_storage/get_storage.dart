@@ -29,13 +29,13 @@ class GetSetStorage {
     return true;
   }
 
-  erase(String key) {
+  void erase(String key) {
     _storage.remove(key);
   }
 
   bool clearLoggedData() {
-    List<String> authTags = ["ACCESS_TOKEN_TAG"];
-    for (var tag in authTags) {
+    const List<String> authTags = ["ACCESS_TOKEN_TAG"];
+    for (final tag in authTags) {
       _storage.remove(tag);
     }
     return true;
@@ -49,16 +49,15 @@ class GetSetStorage {
 
   // Generic method to read data (returns String or bool based on the type)
   dynamic _getData(String key) {
-    final value = _storage.read(key);
-    return value;
+    return _storage.read(key);
   }
 
   String? getString(String key) {
     return _storage.read(key);
   }
 
-  setString(String key, String value) {
-    return _storage.write(key, value);
+  void setString(String key, String value) {
+    _storage.write(key, value);
   }
 
   bool? getBool(String key) => _getData(key);
@@ -67,15 +66,15 @@ class GetSetStorage {
 
   int? getInt(String key) => _getData(key);
 
-  bool setInt(String key, bool value) => _setData(key, value);
+  bool setInt(String key, int value) => _setData(key, value);
 
-  int? getDouble(String key) => _getData(key);
+  double? getDouble(String key) => _getData(key);
 
-  bool setDouble(String key, bool value) => _setData(key, value);
+  bool setDouble(String key, double value) => _setData(key, value);
 
   T? getOrNull<T>(String key) {
-    var value = _getData(key);
-    T? decodedValue = _decodeValue<T>(value);
+    final value = _getData(key);
+    final decodedValue = _decodeValue<T>(value);
     return (decodedValue is T) ? decodedValue : null;
   }
 
@@ -85,37 +84,36 @@ class GetSetStorage {
     _storage.listenKey(key, callback);
   }
 
-  T _decodeValue<T>(value) {
-    if (value == null) return value;
+  T? _decodeValue<T>(dynamic value) {
+    if (value == null) return null;
 
     if (T == String || T == double || T == int || T == bool) {
-      return value;
+      return value as T?;
     }
 
     if (isType<T, DateTime?>() || isType<T, DateTime>()) {
-      return DateTime.parse(value) as T;
+      return DateTime.parse(value.toString()) as T?;
     }
 
-    return value;
+    return value as T?;
   }
 
   dynamic _encodeValue<T>(T? value) {
-    if (value == null) return value;
+    if (value == null) return null;
 
     if (value is String || value is double || value is int || value is bool) {
       return value;
     }
 
     if (value is DateTime) {
-      String encodeValue = (value as DateTime).toIso8601String();
-      return encodeValue;
+      return value.toIso8601String();
     }
 
     return value;
   }
 
-  setOrStorage<T>(String key, T? value) {
-    dynamic setterValue = _encodeValue<T>(value);
+  void setOrStorage<T>(String key, T? value) {
+    final setterValue = _encodeValue<T>(value);
     if (setterValue == null) {
       _storage.remove(key);
     } else {

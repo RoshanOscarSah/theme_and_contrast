@@ -23,17 +23,11 @@ class _AppWrapperState extends State<AppWrapper> {
   @override
   void initState() {
     super.initState();
-    debugPrint('🔄 AppWrapper: Initializing lifecycle handler');
-
     _lifecycleHandler = AppLifecycleHandler(
       onAppResumed: () {
-        // Handle app resumed - refresh theme/contrast settings
-        debugPrint('🔄 AppWrapper: App resumed callback triggered');
         widget.onAppResumed?.call();
       },
       onAppPaused: () {
-        // Handle app paused
-        debugPrint('🔄 AppWrapper: App paused callback triggered');
         widget.onAppPaused?.call();
       },
     );
@@ -41,7 +35,6 @@ class _AppWrapperState extends State<AppWrapper> {
 
   @override
   void dispose() {
-    debugPrint('🔄 AppWrapper: Disposing lifecycle handler');
     _lifecycleHandler.dispose();
     super.dispose();
   }
